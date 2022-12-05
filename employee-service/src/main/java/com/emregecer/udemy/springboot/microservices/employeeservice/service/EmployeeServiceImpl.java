@@ -3,6 +3,7 @@ package com.emregecer.udemy.springboot.microservices.employeeservice.service;
 import com.emregecer.udemy.springboot.microservices.employeeservice.dto.APIResponseDto;
 import com.emregecer.udemy.springboot.microservices.employeeservice.dto.DepartmentDto;
 import com.emregecer.udemy.springboot.microservices.employeeservice.dto.EmployeeDto;
+import com.emregecer.udemy.springboot.microservices.employeeservice.dto.OrganizationDto;
 import com.emregecer.udemy.springboot.microservices.employeeservice.entity.Employee;
 import com.emregecer.udemy.springboot.microservices.employeeservice.mapper.EmployeeMapper;
 import com.emregecer.udemy.springboot.microservices.employeeservice.repository.EmployeeRepository;
@@ -60,14 +61,19 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         //DepartmentDto departmentDto = apiClient.getDepartmentByCode(employee.getDepartmentCode());
 
+        OrganizationDto organizationDto = webClient.get()
+                .uri("http://localhost:8083/api/organizations/" + employee.getOrganizationCode())
+                .retrieve()
+                .bodyToMono(OrganizationDto.class)
+                .block();
+
         EmployeeDto employeeDto = EmployeeMapper.mapToEmployeeDto(employee);
 
-        APIResponseDto apiResponseDto = new APIResponseDto(
+        return new APIResponseDto(
                 employeeDto,
-                departmentDto
+                departmentDto,
+                organizationDto
         );
-
-        return apiResponseDto;
     }
 
     public APIResponseDto getDefaultDepartment(Long employeeId, Exception exception) {
@@ -80,11 +86,14 @@ public class EmployeeServiceImpl implements EmployeeService {
         departmentDto.setDepartmentCode("RD001");
         departmentDto.setDepartmentDescription("Research and Development Department");
 
+        OrganizationDto organizationDto = new OrganizationDto();
+
         EmployeeDto employeeDto = EmployeeMapper.mapToEmployeeDto(employee);
 
         return new APIResponseDto(
                 employeeDto,
-                departmentDto
+                departmentDto,
+                organizationDto
         );
     }
 }
